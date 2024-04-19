@@ -1,11 +1,6 @@
-  import assert from "assert"
-
 const OBJECT = "[object Object]"
-//const isNull = (a: unknown) => a === null
-//const isUndef = (a: unknown) => a === undefined
 const isStr = (a: unknown) : a is string => typeof a === 'string'
 const isSym = (a: unknown) : a is symbol => typeof a === 'symbol'
-//const isArray = Array.isArray
 const isStruct = <T extends {}>(a: unknown) : a is T  => {
   if (a + "" === OBJECT) return true
   else return false
@@ -69,29 +64,37 @@ export const proxyStructRef = <T extends {}>(refMap: RefMap, patches: Array<JSON
 
   const handler: ProxyHandler<T> = {
     get(source, key, _) {
+      const { id } = ref
+      const { stage } = ref
+      const { refMap } = ref
+      const { patches } = ref
       if (isSym(key)) {
-        if (key === PTR_KEY) return ref.id
+        if (key === PTR_KEY) return id
         else if (key === DBG_KEY) return ref
         else throw new Error("No readable public symbol interface")
       } else {
-        if (ref.stage.has(key)) {
-          const staged = ref.stage.get(key) as any
+        if (stage.has(key)) {
+          const staged = stage.get(key) as any
           if (isLiteral(staged)) {
             return staged
+          } else {
+            const deref = refMap.get(staged[PTR_KEY]) as any
+            deref[DEREF_KEY] = `${path}/${key}`
+            return deref
           }
-          const deref = ref.refMap.get(staged[PTR_KEY]) as any
-          deref[DEREF_KEY] = `${path}/${key}`
-          return deref
+        } else {
+          const srcVal = (source as any)[key]
+          if (isLiteral(srcVal)) {
+            return srcVal
+          } else if (isStruct(srcVal)) {
+            const nextRefId = `${refCounter++}`
+            const nextRef = proxyStructRef(refMap, patches, nextRefId, srcVal, `${path}/${key}`)
+            stage.set(key, { [PTR_KEY]: nextRefId })
+            return nextRef
+          } else {
+            throw new Error(`Unhandled getter ${key}`)
+          }
         }
-        const srcVal = (source as any)[key]
-        if (isLiteral(srcVal)) return srcVal
-        if (isStruct(srcVal)) {
-          const nextRefId = `${refCounter++}`
-          const nextRef = proxyStructRef(refMap, patches, nextRefId, srcVal, `${path}/${key}`)
-          ref.stage.set(key, { [PTR_KEY]: nextRefId })
-          return nextRef
-        }
-        throw new Error(`Unhandled getter ${key}`)
       }
     },
     set(_, key, next, __) {
@@ -186,64 +189,3 @@ export const proxyStructRef = <T extends {}>(refMap: RefMap, patches: Array<JSON
   refMap.set(ref.id, proxyRef)
   return proxyRef
 }
-
-
-
-/**
-const proxyStruct = (refMap: Map<string, Ref>, patches: Array<JSONPatch>, ref: Ref, path = "") => {
-  if (!isStruct(ref.source)) throw new Error
-  if (!refMap.has(ref.id)) refMap.set(ref.id, ref)
-  return new Proxy(ref.source as any, {
-    get(source, key) : any {
-      const isSymK = typeof key === 'symbol'
-      if (isSymK) {
-        if (key === REF_KEY) return ref
-        else throw new Error('No publicly accessed symbol keys plz')
-      } else {
-        const stage = ref.stage
-        if (stage.has(key)) {
-          const staged = stage.get(key)
-          if (isLiteral(staged)) return staged
-          if (isStruct(staged)) {
-            const refId = staged[REF_KEY]
-            const ref = refMap.get(refId)
-            if (!ref) throw new Error("No Ref")
-            else return proxyStruct(refMap, patches, ref, path)
-          }
-        }
-        const srcVal = source[key]
-        if (isLiteral(srcVal)) return srcVal
-        else if (isStruct(srcVal)) return proxyStruct(refMap, patches, createRef(srcVal), key)
-        else throw new Error("Unhandled get")
-      }
-    },
-    set(__, key, next, _) {
-      if (isStr(key)) {
-        const stage = ref.stage
-        const keyPath = `${path}/${key}`
-        if (stage.has(key)) {
-          const stagedVal = stage.get(key)
-          const stagedIsLit = isLiteral(stagedVal)
-          const nextIsLit = isLiteral(next)
-          if (stagedIsLit && nextIsLit) {
-            stage.set(key, next)
-            patches.push(replace(keyPath, next))
-            return true
-          }
-          if (stagedIsLit && !nextIsLit) {
-            const nextRef = createRef(next)
-            stage.set(key, { [REF_KEY]: nextRef.id })
-            if (isStruct(next)) proxyStruct(refMap, patches, nextRef, `${path}/${key}`)
-            else throw new Error('Not allowing anything object writes right now')
-            patches.push(replace(keyPath, next))
-            return true
-          }
-          if (!stagedIsLit && nextIsLit) {
-          }
-        }
-      }
-      return true
-    },
-  })
-}
-**/
