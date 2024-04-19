@@ -124,3 +124,28 @@ t.test("Can deref struct and still generate patches beneat root", t => {
   t.end()
 })
 
+t.test("Nested, nested mutation", t => {
+  const root = {
+    m: {
+      n: 1,
+      o: {
+        q: 44
+      },
+      p: 3
+    }
+  }
+  const refs: RefMap = new Map
+  const patches: Array<JSONPatch> = []
+  const proxy = proxyStructRef(refs, patches, `${100005}`, root, "$")
+
+  const detached = proxy.m
+  const next = { q: 22 }
+  detached.o = next
+
+  t.equal(patches.length, 1)
+  t.equal(patches[0].op, "replace")
+  t.equal(patches[0].path, "$/m/o")
+  t.equal((patches[0] as any).value, next)
+  t.end()
+})
+
