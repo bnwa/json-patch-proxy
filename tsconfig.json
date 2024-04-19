@@ -1,0 +1,56 @@
+{
+  "exclude": [
+    "node_modules"
+  ],
+  "include": [
+    "./src/*"
+  ],
+  "compilerOptions": {
+    // Type Checking
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+    "exactOptionalPropertyTypes": true,
+    "noFallthroughCasesInSwitch": false,
+    "noImplicitAny": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "strict": true,
+
+    //Modules
+    "allowArbitraryExtensions": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "moduleDetection": "force",
+
+    //Emit
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "noEmit": true,
+    "removeComments": false,
+
+    //JavaScript Support
+    "allowJs": false,
+
+    //Interop Constraints
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    //Language & Environment
+    "experimentalDecorators": false,
+    "jsx": "react",
+    "lib": [
+      "ESNext",
+      "DOM",
+      "WebWorker"
+    ],
+    "resolveJsonModule": true,
+    "sourceMap": false,
+    "target": "es2022"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "json-patch-proxy",
+  "version": "0.0.1",
+  "license": "GPL-3.0",
+  "description": "Generate json patch lists by mutating an object",
+  "author": "Benoit Barberousse<74591246+bnwa@users.noreply.github.com>",
+  "main": "src/proxy-ref.mjs",
+  "type": "module",
+  "private": false,
+  "scripts": {
+    "test": "tap run"
+  },
+  "devDependencies": {
+    "tap": "^18.7.2"
+  },
+  "dependencies": {
+    "@types/node": "^20.12.7",
+    "tsx": "^4.7.2"
+  }
+}
