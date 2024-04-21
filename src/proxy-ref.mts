@@ -236,6 +236,7 @@ export const proxyArrayRef = <T extends any[]>(refMap: RefMap, patches: Array<JS
       return len + 1
     },
     pop() {
+      let result: any
       const { stage } = ref
       const { source } = ref
       const { patches } = ref
@@ -248,30 +249,34 @@ export const proxyArrayRef = <T extends any[]>(refMap: RefMap, patches: Array<JS
         let staged = stage.get(key) as any
         if (isPtr(staged)) {
           const refId = staged[PTR_KEY]
-          staged = refMap.get(refId)
-          staged[DEREF_KEY] = ""
+          result = refMap.get(refId)
+          result[DEREF_KEY] = ""
+        } else {
+          result = staged
         }
-        --len
         stage.delete(key)
-        if (path) patches.push(remove(`${path}/-`))
-        return staged
-      }
-      if (srcLen < len) throw new Error(`INVARIANT ->
-        array stage should possess key value when source array
-        length is shorter than stage size`)
-      const srcVal = (source as any)[tail]
-      if (isLiteral(srcVal)) {
-        --len
-        return srcVal
-      } else if (isStruct(srcVal)) {
-        const newRefId = `${refCounter++}`
-        const newRef = proxyStructRef(refMap, patches, newRefId, srcVal, '')
-        return newRef
-      } else if (isArr(srcVal)) {
-        // TODO when array methods populated
       } else {
-        throw new Error(`Encountered unknown type popping from array ${path}`)
+        if (srcLen < len) throw new Error(`INVARIANT ->
+          array stage should possess key value when source array
+          length is shorter than stage size`)
+        const srcVal = (source as any)[tail]
+        const srcIsLit = isLiteral(srcVal)
+        const srcIsArr = isArr(srcVal)
+        const srcIsStrc = isStruct(srcVal)
+        if (!srcIsLit && !srcIsStrc && !srcIsArr) throw new Error(`
+          INVARIANT -> Only JSON types accepted as proxied values; check path
+          at ${path}`)
+        if (isLiteral(srcVal)) {
+          result = srcVal
+        } else {
+          const newRefId = `${refCounter++}`
+          if (srcIsStrc) result = proxyStructRef(refMap, patches, newRefId, srcVal, '')
+          else result = proxyArrayRef(refMap, patches, newRefId, srcVal, ``)
+        }
       }
+      --len
+      if (path) patches.push(remove(`${path}/-`))
+      return result
     },
   }
 
@@ -296,6 +301,7 @@ export const proxyArrayRef = <T extends any[]>(refMap: RefMap, patches: Array<JS
           return deref
         }
       }
+      if (key === 'length') return len
       if (key === 'push') return methods.push
       if (key === 'pop') return methods.pop
       const srcVal = (source as any)[key]
