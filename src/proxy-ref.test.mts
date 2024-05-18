@@ -257,3 +257,23 @@ t.test("Writing refs to array", t => {
 
   t.end()
 })
+
+t.test("Map proxied array", t => {
+  const root = [
+    { a: 1 },
+    { a: 2 },
+    { a: 3 },
+    { a: 4 },
+  ]
+  const refs: RefMap = new Map
+  const patches: Array<JSONPatch> = []
+  const proxy = proxyArrayRef(refs, patches, `${100008}`, root, "$")
+
+  const result = proxy.map(x => ({ b: x.a - 1 }))
+  t.equal(result[0]?.b, 0)
+  t.equal(result[1]?.b, 1)
+  t.equal(result[2]?.b, 2)
+  t.equal(result[3]?.b, 3)
+  t.equal(result.length, 4)
+  t.end()
+})

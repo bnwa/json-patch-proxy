@@ -278,6 +278,16 @@ export const proxyArrayRef = <T extends any[]>(refMap: RefMap, patches: Array<JS
       if (path) patches.push(remove(`${path}/-`))
       return result
     },
+    map<T>(f: (x: unknown) => T) : Array<T> {
+      const { id } = ref
+      const proxiedArr = refMap.get(id) as Array<unknown>
+      const transform: Array<T> = []
+       for(let i = 0, x: unknown; i < len; i++) {
+        x = proxiedArr[i]
+        transform.push(f(x))
+      }
+      return transform
+    },
   }
 
   const handler: ProxyHandler<T> = {
@@ -304,6 +314,7 @@ export const proxyArrayRef = <T extends any[]>(refMap: RefMap, patches: Array<JS
       if (key === 'length') return len
       if (key === 'push') return methods.push
       if (key === 'pop') return methods.pop
+      if (key === 'map') return methods.map
       const srcVal = (source as any)[key]
       const srcIsLit = isLiteral(srcVal)
       const srcIsArr = isArr(srcVal)
