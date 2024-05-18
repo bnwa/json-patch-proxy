@@ -8,7 +8,7 @@
   "type": "module",
   "private": false,
   "scripts": {
-    "test": "tap run"
+    "test": "tap --allow-empty-coverage run"
   },
   "devDependencies": {
     "tap": "^18.7.2"
