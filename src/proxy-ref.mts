@@ -288,6 +288,49 @@ export const proxyArrayRef = <T extends any[]>(refMap: RefMap, patches: Array<JS
       }
       return transform
     },
+    filter<T>(f: (x: T) => boolean) : Array<T> {
+      const { id } = ref
+      const proxiedArr = refMap.get(id) as Array<unknown>
+      const transform: Array<T> = []
+       for(let i = 0, x: unknown; i < len; i++) {
+        x = proxiedArr[i]
+        if (f(x as T)) transform.push(x as T)
+      }
+      return transform
+    },
+    reduce<T>(f: (a: T, x: unknown) => T, a: T) : T {
+      const { id } = ref
+      const proxiedArr = refMap.get(id) as Array<unknown>
+       for(let i = 0, x: unknown; i < len; i++) {
+        x = proxiedArr[i]
+        a = f(a, x)
+      }
+      return a
+    },
+    sort<T extends unknown>(f: (a: T, b: T) => number) : Array<T> {
+      const { id } = ref
+      const arr = refMap.get(id) as Array<T>
+      const sorted: Array<T> = [...arr]
+      sorted.sort(f)
+      return sorted
+    },
+  }
+
+  const iterate = function() {
+    let i = -1
+    return {
+      next() {
+        const arr = refMap.get(refId) as Array<unknown>
+        if(++i < len) {
+          const value = arr[i]
+          const result = { done: false, value }
+          return result
+        } else {
+          return { done: true }
+        }
+      },
+      [Symbol.iterator]() { return this },
+    }
   }
 
   const handler: ProxyHandler<T> = {
@@ -299,7 +342,8 @@ export const proxyArrayRef = <T extends any[]>(refMap: RefMap, patches: Array<JS
       if (isSym(key)) {
         if (key === PTR_KEY) return id
         else if (key === DBG_KEY) return ref
-        else throw new Error("No readable public symbol interface")
+        else if (key === Symbol.iterator) return iterate
+        else throw new Error(`No readable public symbol interface when symbol is ${key.toString()}`)
       }
       if (stage.has(key)) {
         const staged = stage.get(key) as any
@@ -315,6 +359,9 @@ export const proxyArrayRef = <T extends any[]>(refMap: RefMap, patches: Array<JS
       if (key === 'push') return methods.push
       if (key === 'pop') return methods.pop
       if (key === 'map') return methods.map
+      if (key === 'filter') return methods.filter
+      if (key === 'reduce') return methods.reduce
+      if (key === 'sort') return methods.sort
       const srcVal = (source as any)[key]
       const srcIsLit = isLiteral(srcVal)
       const srcIsArr = isArr(srcVal)
@@ -333,7 +380,7 @@ export const proxyArrayRef = <T extends any[]>(refMap: RefMap, patches: Array<JS
         else return proxyArrayRef(refMap, patches, nextRefId, srcVal, `${path}/${key}`)
       }
       throw new Error(`
-        INVARIANT -> Attempted to deref a prohibited type on proxied array`)
+        INVARIANT -> Attempted to deref a prohibited type on proxied array for key '${key}'`)
     },
     set(_, key, next, __) {
       if (isSym(key)) {

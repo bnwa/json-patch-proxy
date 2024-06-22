@@ -277,3 +277,81 @@ t.test("Map proxied array", t => {
   t.equal(result.length, 4)
   t.end()
 })
+
+t.test("Filter proxied array", t => {
+  const root = [
+    { a: 1 },
+    { a: 2 },
+    { a: 3 },
+    { a: 4 },
+  ]
+  const refs: RefMap = new Map
+  const patches: Array<JSONPatch> = []
+  const proxy = proxyArrayRef(refs, patches, `${100009}`, root, "$")
+
+  const result = proxy.filter(x => x.a % 2 === 0)
+  t.equal(result.length, 2)
+  t.equal(result[0]?.a, 2)
+  t.equal(result[1]?.a, 4)
+  t.end()
+})
+
+t.test("Reduce proxied array", t => {
+  const root = [
+    { a: 1 },
+    { a: 2 },
+    { a: 3 },
+    { a: 4 },
+  ]
+  const refs: RefMap = new Map
+  const patches: Array<JSONPatch> = []
+  const proxy = proxyArrayRef(refs, patches, `${100010}`, root, "$")
+
+  const result = proxy.reduce((n, elem) => elem.a + n, 0)
+  t.equal(result, 10)
+  t.end()
+})
+
+t.test("Proxied array responds to Iterator protocol", t => {
+  const root = [
+    { a: 1 },
+    { a: 2 },
+    { a: 3 },
+    { a: 4 },
+  ]
+  const refs: RefMap = new Map
+  const patches: Array<JSONPatch> = []
+  const proxy = proxyArrayRef(refs, patches, `${100011}`, root, "$")
+
+  for (const x: any of proxy) {
+    t.ok(typeof x.a === 'number')
+  }
+
+  const spread = [ ...proxy ]
+  t.ok(spread[0]?.a === 1)
+  t.ok(spread[1]?.a === 2)
+  t.ok(spread[2]?.a === 3)
+  t.ok(spread[3]?.a === 4)
+  t.end()
+})
+
+t.test("Sort proxied array", t => {
+  const root = [
+    { a: 1 },
+    { a: 2 },
+    { a: 3 },
+    { a: 4 },
+  ]
+  const refs: RefMap = new Map
+  const patches: Array<JSONPatch> = []
+  const proxy = proxyArrayRef(refs, patches, `${100012}`, root, "$")
+
+  const result = proxy.sort((elem1, elem2) => elem1.a <= elem2.a ? 1 : -1)
+  t.equal(result.length, 4)
+  t.equal(result[0]?.a, 4)
+  t.equal(result[1]?.a, 3)
+  t.equal(result[2]?.a, 2)
+  t.equal(result[3]?.a, 1)
+
+  t.end()
+})
