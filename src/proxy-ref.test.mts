@@ -1,10 +1,10 @@
-import t from 'tap'
+import test from 'tape'
 import { RefMap } from './proxy-ref.mjs'
 import { JSONPatch } from './proxy-ref.mjs'
 import { proxyStructRef } from './proxy-ref.mjs'
 import { proxyArrayRef } from './proxy-ref.mjs'
 
-t.test("Generates patches for root literal field mutation", t => {
+test("Generates patches for root literal field mutation", t => {
   const obj = { a: 1, b: 2 }
   const refs: RefMap = new Map
   const patches: Array<JSONPatch> = []
@@ -23,7 +23,7 @@ t.test("Generates patches for root literal field mutation", t => {
   t.end()
 })
 
-t.test("Generates patches for root literal and ref field mutation", t => {
+test("Generates patches for root literal and ref field mutation", t => {
   const root = {
     c: 1,
     d: "2",
@@ -63,7 +63,7 @@ t.test("Generates patches for root literal and ref field mutation", t => {
   t.end()
 })
 
-t.test("Overwrite ref fields" , t => {
+test("Overwrite ref fields" , t => {
   const root = {
     i: {
       j: 1,
@@ -95,7 +95,7 @@ t.test("Overwrite ref fields" , t => {
   t.end()
 })
 
-t.test("Can deref struct and still generate patches beneat root", t => {
+test("Can deref struct and still generate patches beneat root", t => {
   const root = {
     m: {
       n: 1,
@@ -125,7 +125,7 @@ t.test("Can deref struct and still generate patches beneat root", t => {
   t.end()
 })
 
-t.test("Nested, nested mutation", t => {
+test("Nested, nested mutation", t => {
   const root = {
     m: {
       n: 1,
@@ -150,7 +150,7 @@ t.test("Nested, nested mutation", t => {
   t.end()
 })
 
-t.test("Top-level array of primitives field", t => {
+test("Top-level array of primitives field", t => {
   const root = [ 
     1,
     2,
@@ -183,7 +183,7 @@ t.test("Top-level array of primitives field", t => {
   t.end()
 })
 
-t.test("Writing refs to array", t => {
+test("Writing refs to array", t => {
   const root = [ 
     { a: 1 },
     [ 'a', 'b', 'c' ],
@@ -258,7 +258,7 @@ t.test("Writing refs to array", t => {
   t.end()
 })
 
-t.test("Map proxied array", t => {
+test("Map proxied array", t => {
   const root = [
     { a: 1 },
     { a: 2 },
@@ -278,7 +278,7 @@ t.test("Map proxied array", t => {
   t.end()
 })
 
-t.test("Filter proxied array", t => {
+test("Filter proxied array", t => {
   const root = [
     { a: 1 },
     { a: 2 },
@@ -296,7 +296,7 @@ t.test("Filter proxied array", t => {
   t.end()
 })
 
-t.test("Reduce proxied array", t => {
+test("Reduce proxied array", t => {
   const root = [
     { a: 1 },
     { a: 2 },
@@ -312,7 +312,7 @@ t.test("Reduce proxied array", t => {
   t.end()
 })
 
-t.test("Proxied array responds to Iterator protocol", t => {
+test("Proxied array responds to Iterator protocol", t => {
   const root = [
     { a: 1 },
     { a: 2 },
@@ -323,19 +323,19 @@ t.test("Proxied array responds to Iterator protocol", t => {
   const patches: Array<JSONPatch> = []
   const proxy = proxyArrayRef(refs, patches, `${100011}`, root, "$")
 
-  for (const x: any of proxy) {
-    t.ok(typeof x.a === 'number')
+  for (const x of proxy) {
+    t.true(typeof x.a === 'number')
   }
 
   const spread = [ ...proxy ]
-  t.ok(spread[0]?.a === 1)
-  t.ok(spread[1]?.a === 2)
-  t.ok(spread[2]?.a === 3)
-  t.ok(spread[3]?.a === 4)
+  t.true(spread[0]?.a === 1)
+  t.true(spread[1]?.a === 2)
+  t.true(spread[2]?.a === 3)
+  t.true(spread[3]?.a === 4)
   t.end()
 })
 
-t.test("Sort proxied array", t => {
+test("Sort proxied array", t => {
   const root = [
     { a: 1 },
     { a: 2 },

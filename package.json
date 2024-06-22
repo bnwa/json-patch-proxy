@@ -8,13 +8,15 @@
   "type": "module",
   "private": false,
   "scripts": {
-    "test": "tap --allow-empty-coverage run"
+    "test": "tsx ./src/*.test.mts | tap-dot"
   },
   "devDependencies": {
-    "tap": "^18.7.2"
+    "@types/tape": "^5.6.4",
+    "tap-dot": "^2.0.0",
+    "tape": "^5.8.1",
+    "tsx": "^4.15.7"
   },
   "dependencies": {
-    "@types/node": "^20.12.7",
-    "tsx": "^4.7.2"
+    "@types/node": "^20.12.7"
   }
 }
