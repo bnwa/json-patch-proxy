@@ -8,7 +8,7 @@
   "type": "module",
   "private": false,
   "scripts": {
-    "test": "tsx ./src/*.test.mts | tap-dot"
+    "test": "tsx ./src/*.test.ts | tap-dot"
   },
   "devDependencies": {
     "@types/tape": "^5.6.4",

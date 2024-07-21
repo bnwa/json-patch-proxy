@@ -1,8 +1,8 @@
 import test from 'tape'
-import { RefMap } from './proxy-ref.mjs'
-import { JSONPatch } from './proxy-ref.mjs'
-import { proxyStructRef } from './proxy-ref.mjs'
-import { proxyArrayRef } from './proxy-ref.mjs'
+import { RefMap } from './proxy-ref'
+import { JSONPatch } from './proxy-ref'
+import { proxyStructRef } from './proxy-ref'
+import { proxyArrayRef } from './proxy-ref'
 
 test("Generates patches for root literal field mutation", t => {
   const obj = { a: 1, b: 2 }
@@ -151,7 +151,7 @@ test("Nested, nested mutation", t => {
 })
 
 test("Top-level array of primitives field", t => {
-  const root = [ 
+  const root = [
     1,
     2,
     3,
@@ -184,7 +184,7 @@ test("Top-level array of primitives field", t => {
 })
 
 test("Writing refs to array", t => {
-  const root = [ 
+  const root = [
     { a: 1 },
     [ 'a', 'b', 'c' ],
   ]

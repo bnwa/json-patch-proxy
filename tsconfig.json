@@ -23,8 +23,8 @@
 
     //Modules
     "allowArbitraryExtensions": true,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "Preserve",
+    "moduleResolution": "Bundler",
     "moduleDetection": "force",
 
     //Emit
@@ -43,14 +43,8 @@
 
     //Language & Environment
     "experimentalDecorators": false,
-    "jsx": "react",
-    "lib": [
-      "ESNext",
-      "DOM",
-      "WebWorker"
-    ],
+    "lib": [ "ESNext" ],
     "resolveJsonModule": true,
-    "sourceMap": false,
     "target": "es2022"
   }
 }
